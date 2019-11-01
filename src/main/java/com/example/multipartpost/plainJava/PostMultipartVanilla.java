@@ -1,8 +1,8 @@
 package com.example.multipartpost.plainJava;
 
 import lombok.SneakyThrows;
-import org.apache.http.entity.mime.HttpMultipartMode;
-import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.HttpEntity;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 
 import java.io.File;
@@ -23,16 +23,22 @@ public class PostMultipartVanilla {
         FileBody fileBody = new FileBody(new File("/c/Users/deinf.abrao/projects/multipart-post/HELP.md"));
         FileBody fileBody2 = new FileBody(new File("/c/Users/deinf.abrao/projects/multipart-post/meuNome"));
 
-        MultipartEntity multipartEntity = new MultipartEntity(HttpMultipartMode.STRICT);
+        MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create();
 
-        multipartEntity.addPart("filedata", fileBody);
-        multipartEntity.addPart("filedata", fileBody2);
+        multipartEntityBuilder.addPart("filedata", fileBody);
+        multipartEntityBuilder.addPart("filedata", fileBody2);
 
-        connection.setRequestProperty("Content-Type", multipartEntity.getContentType().getValue());
+        HttpEntity build = multipartEntityBuilder.build();
+
+        connection.setRequestProperty("Content-Type", build.getContentType().getValue());
+
+        connection.setRequestProperty("my-custom-header", "my-custom-header-value");
+        connection.setRequestProperty("my-custom-header2", "my-custom-header-value2");
+
         OutputStream out = connection.getOutputStream();
 
         try {
-            multipartEntity.writeTo(out);
+            build.writeTo(out);
         } finally {
             out.close();
         }
